@@ -5,6 +5,8 @@ A fast, semantic CLI tool to search for commands, powered by local embeddings.
 [![GitHub Release](https://img.shields.io/github/v/release/aether-flux/infiltrator?style=for-the-badge&logo=github&color=2bbc8a)](https://github.com/aether-flux/infiltrator/releases/latest)
 [![License](https://img.shields.io/github/license/aether-flux/infiltrator?style=for-the-badge&color=8a2be2)](LICENSE)
 
+[![asciicast](https://asciinema.org/a/123456.svg)](https://asciinema.org/a/mpEu3J0KEHLaUZVo)
+
 ---
 
 ## Features
