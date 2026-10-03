@@ -1,0 +1,25 @@
+git status
+git log --oneline --graph --all
+git commit -m "fix memory leak in stream parser"
+git reset --hard HEAD~1
+rm -rf node_modules
+rm -rf ~/.cache/yarn
+find . -name "*.rs" -type f
+find /var/log -type f -name "*.log" -mtime +30
+docker stop $(docker ps -a -q)
+docker-compose up -d --build
+docker system prune -a --volumes
+sudo systemctl restart nginx
+sudo systemctl status docker.service
+chmod +x deploy.sh
+chown -R www-data:www-data /var/www/html
+lsof -i :8080
+kill -9 $(lsof -t -i:3000)
+nc -zv 127.0.0.1 5432
+curl -X POST https://api.example.com/v1/ingest -H "Content-Type: application/json" -d '{"status":"ok"}'
+tail -f /var/log/nginx/error.log
+grep -rn "TODO" src/
+tar -czvf backup.tar.gz ./data
+rsync -avz --progress ./dist/ user@remote:/var/www/app
+cargo test --all -- --nocapture
+cargo build --release
