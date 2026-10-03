@@ -19,9 +19,10 @@ pub fn handle_args(args: &Args) -> Result<()> {
     let commands: Vec<&str> = candidate_strings.iter().map(|s| s.as_str()).collect();
 
     // Initialize model
+    let show_progress = !args.raw && io::stderr().is_terminal();
     let mut model = TextEmbedding::try_new(
         TextInitOptions::new(fastembed::EmbeddingModel::AllMiniLML6V2)
-            .with_show_download_progress(true),
+            .with_show_download_progress(show_progress),
     )?;
 
     // Get command embeddings
@@ -30,7 +31,12 @@ pub fn handle_args(args: &Args) -> Result<()> {
     // Get query and embeddings
     let query = match args.query.clone() {
         Some(q) => q,
-        None => inquire::Text::new("Enter query: ").prompt()?,
+        None => {
+            if args.raw {
+                anyhow::bail!("Query (-q) is required when running in raw mode");
+            }
+            inquire::Text::new("Enter query: ").prompt()?
+        }
     };
     let query_embeddings = embed_query(query, &mut model)?;
 
@@ -46,20 +52,24 @@ pub fn handle_args(args: &Args) -> Result<()> {
     scored_res.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
 
     // Prepare final list of choices
-    let top_k = 3;
-    let choices: Vec<String> = scored_res
-        .into_iter()
-        .take(top_k)
-        // .filter(|(_, score)| *score >= 0.20f32)
-        .map(|(cmd, score)| format!("[{:.2}] {}", score, cmd))
-        .collect();
+    if args.raw {
+        let top_match = scored_res.first().context("No matches found")?.0;
+        println!("{}", top_match);
+    } else {
+        let top_k = 3;
+        let choices: Vec<String> = scored_res
+            .into_iter()
+            .take(top_k)
+            .map(|(cmd, score)| format!("[{:.2}] {}", score, cmd))
+            .collect();
 
-    if choices.is_empty() {
-        anyhow::bail!("No proper command found");
+        if choices.is_empty() {
+            anyhow::bail!("No proper command found");
+        }
+
+        let selected = inquire::Select::new("Matches:", choices).prompt()?;
+        println!("Selected: {}", selected);
     }
-
-    let selected = inquire::Select::new("Matches:", choices).prompt()?;
-    println!("Selected: {}", selected);
 
     Ok(())
 }

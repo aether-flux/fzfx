@@ -10,4 +10,13 @@ pub struct Args {
 
     #[arg(short = 'f', long = "data-file")]
     pub data_file: Option<PathBuf>,
+
+    #[arg(short, long)]
+    pub raw: bool,
+
+    #[arg(short, long)]
+    pub copy: bool,
+
+    #[arg(short = 'x', long)]
+    pub exec: bool,
 }
