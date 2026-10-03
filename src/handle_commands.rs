@@ -7,7 +7,10 @@ use std::{
 use anyhow::{Context, Result};
 use fastembed::{TextEmbedding, TextInitOptions, similarity::cosine_similarity};
 
-use crate::cli::Args;
+use crate::{
+    cli::Args,
+    util::{extract_command, handle_copy_and_exec},
+};
 
 pub fn handle_args(args: &Args) -> Result<()> {
     // Load candidate dataset
@@ -52,9 +55,10 @@ pub fn handle_args(args: &Args) -> Result<()> {
     scored_res.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
 
     // Prepare final list of choices
-    if args.raw {
+    let selected_raw = if args.raw {
         let top_match = scored_res.first().context("No matches found")?.0;
-        println!("{}", top_match);
+        // println!("{}", top_match);
+        top_match.to_string()
     } else {
         let top_k = 3;
         let choices: Vec<String> = scored_res
@@ -68,7 +72,14 @@ pub fn handle_args(args: &Args) -> Result<()> {
         }
 
         let selected = inquire::Select::new("Matches:", choices).prompt()?;
-        println!("Selected: {}", selected);
+        // println!("Selected: {}", selected);
+        extract_command(&selected).to_string()
+    };
+
+    if !args.copy && !args.exec && !args.raw {
+        println!("{}", selected_raw);
+    } else {
+        handle_copy_and_exec(&selected_raw, args.copy, args.exec)?;
     }
 
     Ok(())
