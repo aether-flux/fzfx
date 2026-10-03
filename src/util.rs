@@ -3,6 +3,7 @@ use std::process::Command;
 use anyhow::{Context, Result};
 use arboard::Clipboard;
 
+/// Extract command string from given selected choice
 pub fn extract_command(selected: &str) -> &str {
     if let Some((_, cmd)) = selected.split_once("] ") {
         cmd.trim()
@@ -11,6 +12,7 @@ pub fn extract_command(selected: &str) -> &str {
     }
 }
 
+/// Checks copy and exec flags and functions accordingly
 pub fn handle_copy_and_exec(cmd: &str, copy: bool, exec: bool) -> Result<()> {
     if copy {
         let mut clipboard = Clipboard::new().context("Failed to initialize system clipboard")?;

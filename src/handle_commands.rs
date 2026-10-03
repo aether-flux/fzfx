@@ -8,10 +8,12 @@ use anyhow::{Context, Result};
 use fastembed::{TextEmbedding, TextInitOptions, similarity::cosine_similarity};
 
 use crate::{
+    cache::{EmbeddingCache, get_cache_dir},
     cli::Args,
     util::{extract_command, handle_copy_and_exec},
 };
 
+/// Handle CLI arguments
 pub fn handle_args(args: &Args) -> Result<()> {
     // Load candidate dataset
     let candidate_strings = load_commands(args.data_file.clone())?;
@@ -23,13 +25,17 @@ pub fn handle_args(args: &Args) -> Result<()> {
 
     // Initialize model
     let show_progress = !args.raw && io::stderr().is_terminal();
+    let cache_dir = get_cache_dir()?;
     let mut model = TextEmbedding::try_new(
         TextInitOptions::new(fastembed::EmbeddingModel::AllMiniLML6V2)
+            .with_cache_dir(cache_dir)
             .with_show_download_progress(show_progress),
     )?;
 
+    let mut cache = EmbeddingCache::load();
+
     // Get command embeddings
-    let cmd_embeddings = embed_commands(&commands, &mut model)?;
+    let cmd_embeddings = cache.get_or_compute_embeddings(&commands, &mut model)?;
 
     // Get query and embeddings
     let query = match args.query.clone() {
@@ -85,6 +91,7 @@ pub fn handle_args(args: &Args) -> Result<()> {
     Ok(())
 }
 
+/// Load command list from file or piped input
 fn load_commands(data_file_arg: Option<PathBuf>) -> Result<Vec<String>> {
     let stdin = io::stdin();
 
@@ -122,6 +129,7 @@ fn load_commands(data_file_arg: Option<PathBuf>) -> Result<Vec<String>> {
     load_default_commands()
 }
 
+/// Load command list from bash/zsh history (default)
 fn load_default_commands() -> Result<Vec<String>> {
     let home_dir = dirs::home_dir().context("Could not determine home directory")?;
 
@@ -158,14 +166,6 @@ fn parse_history_line(line: &str) -> String {
         }
     }
     trimmed.to_string()
-}
-
-/// Create command embeddings
-fn embed_commands(commands: &Vec<&str>, model: &mut TextEmbedding) -> Result<Vec<Vec<f32>>> {
-    let fmt_commands: Vec<String> = commands.iter().map(|c| format!("{}", c)).collect();
-    let embeddings = model.embed(fmt_commands, None)?;
-
-    Ok(embeddings)
 }
 
 /// Create query embeddings

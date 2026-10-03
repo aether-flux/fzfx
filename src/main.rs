@@ -3,6 +3,7 @@ use clap::Parser;
 
 use crate::{cli::Args, handle_commands::handle_args};
 
+mod cache;
 mod cli;
 mod handle_commands;
 mod util;
