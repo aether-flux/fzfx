@@ -2,6 +2,14 @@
 name = "fzfx"
 version = "0.1.0"
 edition = "2024"
+authors = ["Amartya Chowdhury"]
+description = "Fast, semantic CLI command finder powered by local embeddings."
+readme = "README.md"
+license = "MIT"
+homepage = "https://github.com/aether-flux/fzfx"
+repository = "https://github.com/aether-flux/fzfx"
+keywords = ["cli", "fuzzy", "semantic", "finder", "onnx"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 anyhow = "1.0.104"
