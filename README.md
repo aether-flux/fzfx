@@ -1,7 +1,7 @@
 # fzfx
 
-[![Crates.io](https://img.shields.io/crates/v/fzfx?style=for-the-badge&logo=rust&color=e05d44)](https://crates.io/crates/infiltrator)
-[![GitHub Release](https://img.shields.io/github/v/release/aether-flux/fzfx?style=for-the-badge&logo=github&color=2bbc8a)](https://github.com/aether-flux/infiltrator/releases/latest)
+[![Crates.io](https://img.shields.io/crates/v/fzfx?style=for-the-badge&logo=rust&color=e05d44)](https://crates.io/crates/fzfx)
+[![GitHub Release](https://img.shields.io/github/v/release/aether-flux/fzfx?style=for-the-badge&logo=github&color=2bbc8a)](https://github.com/aether-flux/fzfx/releases/latest)
 [![License](https://img.shields.io/github/license/aether-flux/fzfx?style=for-the-badge&color=8a2be2)](LICENSE)
 
 [![asciicast](https://asciinema.org/a/mpEu3J0KEHLaUZVo)](https://asciinema.org/a/mpEu3J0KEHLaUZVo)
