@@ -5,6 +5,7 @@ use crate::{cli::Args, handle_commands::handle_args};
 
 mod cache;
 mod cli;
+mod context;
 mod handle_commands;
 mod util;
 

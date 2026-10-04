@@ -1,14 +1,13 @@
+use ahash::AHashMap;
 use fastembed::TextEmbedding;
 use serde::{Deserialize, Serialize};
 use std::{
-    collections::HashMap,
     fs::{self, File},
     io::{BufReader, BufWriter},
     path::PathBuf,
 };
 
 use anyhow::{Context, Result};
-use bincode;
 
 /// Get cache directory path depending on OS
 pub fn get_cache_dir() -> Result<PathBuf> {
@@ -24,7 +23,7 @@ pub fn get_cache_dir() -> Result<PathBuf> {
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct EmbeddingCache {
-    pub store: HashMap<String, Vec<f32>>,
+    pub store: AHashMap<String, Vec<f32>>,
 }
 
 impl EmbeddingCache {
@@ -59,12 +58,34 @@ impl EmbeddingCache {
         Ok(())
     }
 
+    pub fn clear_cache_files(clear_all: bool) -> Result<()> {
+        let path = get_cache_dir()?;
+        if !path.exists() {
+            eprintln!("No cache to remove");
+            return Ok(());
+        }
+
+        let embedding_cache = path.join("embeddings.bin");
+        if embedding_cache.exists() {
+            fs::remove_file(&embedding_cache)?;
+            eprintln!("Successfully cleared embedding cache");
+        }
+
+        if clear_all {
+            fs::remove_dir_all(&path)?;
+            eprintln!("All cache files cleared");
+        }
+
+        Ok(())
+    }
+
     pub fn get_or_compute_embeddings(
         &mut self,
         commands: &[&str],
         model: &mut TextEmbedding,
     ) -> Result<Vec<Vec<f32>>> {
-        let mut missing_commands: Vec<String> = Vec::new();
+        let mut missing_raw_commands: Vec<String> = Vec::new();
+        let mut missing_enriched_commands: Vec<String> = Vec::new();
         let mut missing_idxs: Vec<usize> = Vec::new();
 
         let mut results: Vec<Option<Vec<f32>>> = vec![None; commands.len()];
@@ -73,16 +94,19 @@ impl EmbeddingCache {
             if let Some(vec) = self.store.get(cmd) {
                 results[idx] = Some(vec.clone());
             } else {
-                missing_commands.push(cmd.to_string());
+                missing_raw_commands.push(cmd.to_string());
+                missing_enriched_commands.push(add_cmd_context(cmd));
                 missing_idxs.push(idx);
             }
         }
 
-        if !missing_commands.is_empty() {
-            let computed_embeddings = model.embed(missing_commands.clone(), None)?;
+        if !missing_raw_commands.is_empty() {
+            let computed_embeddings = model.embed(missing_raw_commands.clone(), None)?;
 
-            for (cmd, emb, orig_idx) in izip(missing_commands, computed_embeddings, missing_idxs) {
-                self.store.insert(cmd, emb.clone());
+            for (raw_cmd, emb, orig_idx) in
+                izip(missing_raw_commands, computed_embeddings, missing_idxs)
+            {
+                self.store.insert(raw_cmd, emb.clone());
                 results[orig_idx] = Some(emb);
             }
 
@@ -95,6 +119,8 @@ impl EmbeddingCache {
 }
 
 use std::iter::zip;
+
+use crate::context::add_cmd_context;
 fn izip(
     a: Vec<String>,
     b: Vec<Vec<f32>>,

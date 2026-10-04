@@ -12,6 +12,7 @@ keywords = ["cli", "fuzzy", "semantic", "finder", "onnx"]
 categories = ["command-line-utilities"]
 
 [dependencies]
+ahash = "0.8.12"
 anyhow = "1.0.104"
 arboard = { version = "3.6.1", features = ["wayland-data-control"] }
 bincode = "1.3.3"

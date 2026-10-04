@@ -15,6 +15,11 @@ use crate::{
 
 /// Handle CLI arguments
 pub fn handle_args(args: &Args) -> Result<()> {
+    // Clear cache if flags are passed
+    if args.clear_cache {
+        EmbeddingCache::clear_cache_files(args.clear_all)?;
+    }
+
     // Load candidate dataset
     let candidate_strings = load_commands(args.data_file.clone())?;
     if candidate_strings.is_empty() {
@@ -66,7 +71,7 @@ pub fn handle_args(args: &Args) -> Result<()> {
         // println!("{}", top_match);
         top_match.to_string()
     } else {
-        let top_k = 3;
+        let top_k = args.top_k;
         let choices: Vec<String> = scored_res
             .into_iter()
             .take(top_k)
@@ -82,9 +87,11 @@ pub fn handle_args(args: &Args) -> Result<()> {
         extract_command(&selected).to_string()
     };
 
-    if !args.copy && !args.exec && !args.raw {
+    if args.raw || (!args.copy && !args.exec && !args.raw) {
         println!("{}", selected_raw);
-    } else {
+    }
+
+    if args.copy || args.exec {
         handle_copy_and_exec(&selected_raw, args.copy, args.exec)?;
     }
 
