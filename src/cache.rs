@@ -31,6 +31,10 @@ impl EmbeddingCache {
         Ok(get_cache_dir()?.join("embeddings.bin"))
     }
 
+    pub fn new_ephemeral() -> Self {
+        Self::default()
+    }
+
     pub fn load() -> Self {
         let path = match Self::cache_file_path() {
             Ok(p) => p,
@@ -101,7 +105,13 @@ impl EmbeddingCache {
         }
 
         if !missing_raw_commands.is_empty() {
-            let computed_embeddings = model.embed(missing_raw_commands.clone(), None)?;
+            let computed_embeddings = model.embed(
+                missing_raw_commands
+                    .iter()
+                    .map(|s| s.as_str())
+                    .collect::<Vec<&str>>(),
+                None,
+            )?;
 
             for (raw_cmd, emb, orig_idx) in
                 izip(missing_raw_commands, computed_embeddings, missing_idxs)

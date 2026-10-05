@@ -10,6 +10,7 @@ use fastembed::{TextEmbedding, TextInitOptions, similarity::cosine_similarity};
 use crate::{
     cache::{EmbeddingCache, get_cache_dir},
     cli::Args,
+    hybrid::HybridMatch,
     util::{extract_command, handle_copy_and_exec},
 };
 
@@ -18,6 +19,11 @@ pub fn handle_args(args: &Args) -> Result<()> {
     // Clear cache if flags are passed
     if args.clear_cache {
         EmbeddingCache::clear_cache_files(args.clear_all)?;
+        return Ok(());
+    }
+
+    if args.clear_all {
+        return Ok(());
     }
 
     // Load candidate dataset
@@ -52,30 +58,32 @@ pub fn handle_args(args: &Args) -> Result<()> {
             inquire::Text::new("Enter query: ").prompt()?
         }
     };
-    let query_embeddings = embed_query(query, &mut model)?;
+    let query_embeddings = embed_query(&query, &mut model)?;
 
     // Get result scores in ascending order
-    let mut scored_res: Vec<(&str, f32)> = commands
+    let vector_res: Vec<(String, f32)> = commands
         .iter()
         .zip(cmd_embeddings.iter())
         .map(|(cmd, emb)| {
             let score = cosine_similarity(&query_embeddings, emb);
-            (*cmd, score)
+            let cmd = cmd.to_string();
+            (cmd, score)
         })
         .collect();
-    scored_res.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+    // scored_res.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+
+    let scored_res = HybridMatch::rerank(&query, vector_res, 0.7);
 
     // Prepare final list of choices
     let selected_raw = if args.raw {
-        let top_match = scored_res.first().context("No matches found")?.0;
-        // println!("{}", top_match);
-        top_match.to_string()
+        let top_match = scored_res.into_iter().next().context("No matches found")?;
+        top_match.command
     } else {
         let top_k = args.top_k;
         let choices: Vec<String> = scored_res
             .into_iter()
             .take(top_k)
-            .map(|(cmd, score)| format!("[{:.2}] {}", score, cmd))
+            .map(|m| format!("[{:.2}] {}", m.final_score, m.command))
             .collect();
 
         if choices.is_empty() {
@@ -176,7 +184,7 @@ fn parse_history_line(line: &str) -> String {
 }
 
 /// Create query embeddings
-fn embed_query(query: String, model: &mut TextEmbedding) -> Result<Vec<f32>> {
+fn embed_query(query: &str, model: &mut TextEmbedding) -> Result<Vec<f32>> {
     let query = format!("{}", query);
     let mut embeddings = model.embed(vec![query], None)?;
 
