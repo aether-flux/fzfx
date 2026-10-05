@@ -23,6 +23,7 @@ pub fn handle_args(args: &Args) -> Result<()> {
     }
 
     if args.clear_all {
+        EmbeddingCache::clear_cache_files(args.clear_all)?;
         return Ok(());
     }
 

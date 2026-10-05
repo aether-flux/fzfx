@@ -16,6 +16,7 @@
 - **Direct Execution (`-x` / `--exec`):** Automatically runs your chosen command in a subshell once selected.
 - **Clipboard Copy (`-c` / `--copy`):** Copies the selected command directly to your system clipboard.
 - **Script & Agent Friendly (`-r` / `--raw`):** Outputs only the top match string without interactive terminal UI or extra logs.
+- **Clear Cache**: Use `--clear-cache` or `-C` to clear embeddings cache, and `--clear-all` to clear both model and embedding cache files.
 
 ---
 
@@ -51,6 +52,9 @@ Pipe any command list or history file into `fzfx`:
 # Search through bash history
 cat ~/.bash_history | fzfx -q "check disk space"
 
+# Search through your terminal's history
+history | fzfx -q "list disk partitions"
+
 # Search active process list
 ps aux | fzfx -q "kill web server"
 ```
@@ -71,6 +75,8 @@ fzfx -f ~/.bash_history
 | `-x` | `--exec`             | Automatically execute selected command                        |
 | `-c` | `--copy`             | Copy selected command to clipboard                            |
 | `-r` | `--raw`              | Print top match only (non-interactive, for scripts/AI agents) |
+| `-C` | `--clear-cache`      | Remove cache files for command embedding                      |
+| NA   | `--clear-all`        | Remove both model and embedding cache files                   |
 
 
 ---
@@ -84,13 +90,18 @@ fzfx -f ~/.bash_history -q "list docker containers" -c
 
 ### Search and Execute Immediately
 ```sh
-fzfx -f ~/.bash_history -q "find large files" -x
+history | fzfx -q "find large files" -x
 ```
 
 ### Non-Interactive Script Integration
 ```sh
 CMD=$(fzfx -f commands.txt -q "restart nginx" -r)
 eval "$CMD"
+```
+
+### Clear all cache files
+```sh
+fzfx --clear-all
 ```
 
 ---

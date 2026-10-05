@@ -31,7 +31,7 @@ impl EmbeddingCache {
         Ok(get_cache_dir()?.join("embeddings.bin"))
     }
 
-    pub fn new_ephemeral() -> Self {
+    pub fn _new_ephemeral() -> Self {
         Self::default()
     }
 

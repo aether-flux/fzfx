@@ -1,6 +1,6 @@
 [package]
 name = "fzfx"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2024"
 authors = ["Amartya Chowdhury"]
 description = "Fast, semantic CLI command finder powered by local embeddings."
@@ -32,3 +32,10 @@ criterion = { version = "0.8.2", features = ["html_reports"] }
 [[bench]]
 name = "embedding_bench"
 harness = false
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

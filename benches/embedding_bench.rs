@@ -51,7 +51,7 @@ fn bench_embedding(c: &mut Criterion) {
             )
             .expect("Failed to init model");
 
-            let mut cache = EmbeddingCache::new_ephemeral();
+            let mut cache = EmbeddingCache::_new_ephemeral();
             let embeddings = cache
                 .get_or_compute_embeddings(black_box(&sample_commands), &mut model)
                 .expect("Failed to compute embeddings");
@@ -74,7 +74,7 @@ fn bench_embedding(c: &mut Criterion) {
     group.bench_function("02_warm_model_cold_embed_cache", |b| {
         b.iter(|| {
             // Re-instantiate empty cache on each iteration
-            let mut cold_cache = EmbeddingCache::new_ephemeral();
+            let mut cold_cache = EmbeddingCache::_new_ephemeral();
             let embeddings = cold_cache
                 .get_or_compute_embeddings(black_box(&sample_commands), &mut warm_model)
                 .expect("Failed to compute embeddings");
