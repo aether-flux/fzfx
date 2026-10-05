@@ -89,15 +89,15 @@ fetch_data() {
     output="$2"
     if command -v curl >/dev/null 2>&1; then
         if [ -n "$output" ]; then
-            curl -fsSL "$url" -o "$output"
+            curl -fsSL --progress-bar "$url" -o "$output"
         else
             curl -fsSL "$url"
         fi
     elif command -v wget >/dev/null 2>&1; then
         if [ -n "$output" ]; then
-            wget -qO "$output" "$url"
+            wget --show-progress -qO "$output" "$url"
         else
-            wget -qO- "$url"
+            wget --show-progress -qO- "$url"
         fi
     else
         error "Neither 'curl' nor 'wget' was found. Please install one of them."
