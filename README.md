@@ -75,6 +75,7 @@ fzfx -f ~/.bash_history
 | `-x` | `--exec`             | Automatically execute selected command                        |
 | `-c` | `--copy`             | Copy selected command to clipboard                            |
 | `-r` | `--raw`              | Print top match only (non-interactive, for scripts/AI agents) |
+| `-k` | `--top-k <NUM>`      | Specify number of results to show (default = 10)              |
 | `-C` | `--clear-cache`      | Remove cache files for command embedding                      |
 | NA   | `--clear-all`        | Remove both model and embedding cache files                   |
 
