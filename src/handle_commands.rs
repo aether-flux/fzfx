@@ -116,7 +116,7 @@ fn load_commands(data_file_arg: Option<PathBuf>) -> Result<Vec<String>> {
         let lines: Vec<String> = stdin
             .lock()
             .lines()
-            .filter_map(Result::ok)
+            .map_while(Result::ok)
             .map(|l| l.trim().to_string())
             .filter(|l| !l.is_empty())
             .collect();
@@ -133,7 +133,7 @@ fn load_commands(data_file_arg: Option<PathBuf>) -> Result<Vec<String>> {
 
         let lines: Vec<String> = reader
             .lines()
-            .filter_map(Result::ok)
+            .map_while(Result::ok)
             .map(|l| l.trim().to_string())
             .filter(|l| !l.is_empty())
             .collect();
@@ -165,7 +165,7 @@ fn load_default_commands() -> Result<Vec<String>> {
 
     let mut lines: Vec<String> = reader
         .lines()
-        .filter_map(Result::ok)
+        .map_while(Result::ok)
         .map(|l| parse_history_line(&l))
         .filter(|l| !l.is_empty())
         .collect();
@@ -176,17 +176,17 @@ fn load_default_commands() -> Result<Vec<String>> {
 
 fn parse_history_line(line: &str) -> String {
     let trimmed = line.trim();
-    if trimmed.starts_with(':') {
-        if let Some((_, cmd)) = trimmed.split_once(';') {
-            return cmd.trim().to_string();
-        }
+    if trimmed.starts_with(':')
+        && let Some((_, cmd)) = trimmed.split_once(';')
+    {
+        return cmd.trim().to_string();
     }
     trimmed.to_string()
 }
 
 /// Create query embeddings
 fn embed_query(query: &str, model: &mut TextEmbedding) -> Result<Vec<f32>> {
-    let query = format!("{}", query);
+    let query = query.to_string();
     let mut embeddings = model.embed(vec![query], None)?;
 
     if embeddings.is_empty() {

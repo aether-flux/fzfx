@@ -123,7 +123,7 @@ impl EmbeddingCache {
             let _ = self.save();
         }
 
-        let final_embs = results.into_iter().filter_map(|x| x).collect();
+        let final_embs = results.into_iter().flatten().collect();
         Ok(final_embs)
     }
 }

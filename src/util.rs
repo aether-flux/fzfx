@@ -31,10 +31,10 @@ pub fn handle_copy_and_exec(cmd: &str, copy: bool, exec: bool) -> Result<()> {
             .status()
             .context("Failed to execute command")?;
 
-        if !status.success() {
-            if let Some(code) = status.code() {
-                eprintln!("Command exited with status code: {}", code);
-            }
+        if !status.success()
+            && let Some(code) = status.code()
+        {
+            eprintln!("Command exited with status code: {}", code);
         }
     }
 
