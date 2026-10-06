@@ -128,6 +128,9 @@ fz() {
 | Warm model, Warm cache | `~729.5ns` | Instant lookup hit against cached embeddings serialized into hashmap (ahash). |
 | Hybrid Rerank only | `~2.5µs` | Combined fuzzy distance search and cosine vector similarity to calculate final score. |
 
+> [!INFO]
+> **Note on Cold Starts:** Benchmark `01` reflects isolated test runs that re-instantiate the ONNX environment on every iteration. In real-world CLI usage, warm-cache lookups execute sub-millisecond (`< 1 µs`), making `fzfx` feel instant in the terminal.
+
 ---
 
 ## Cache and Storage
