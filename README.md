@@ -116,6 +116,20 @@ fz() {
 }
 ```
 
+---
+
+## Benchmarks
+`fzfx` is benchmarked using [Criterion.rs](https://github.com/bheisler/criterion.rs) across multiple execution paths to evaluate model cold starts, embedding latencies, and persistent cache hit speeds.
+
+| Execution State | Latency | Description |
+| :--- | :--- | :--- |
+| Fully Cold | `~10.3s` | Initial runtime setup, model weight loading, and initial downloads. |
+| Warm model, Cold cache | `~36.1ms` | Model cached on-disk, batch computing ~10 missing embeddings via `fastembed`. |
+| Warm model, Warm cache | `~729.5ns` | Instant lookup hit against cached embeddings serialized into hashmap (ahash). |
+| Hybrid Rerank only | `~2.5µs` | Combined fuzzy distance search and cosine vector similarity to calculate final score. |
+
+---
+
 ## Cache and Storage
 `fzfx` respects standard OS cache paths:
 - Linux: `~/.cache/fzfx/`
